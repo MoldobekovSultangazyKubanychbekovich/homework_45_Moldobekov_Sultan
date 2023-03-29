@@ -52,49 +52,36 @@ namespace homework_45_1
         {
             string fileName = context.Request.Url.AbsolutePath;
             Console.WriteLine(fileName);
-            if (fileName != GetContentType(fileName))
+            fileName = _siteDirectory + fileName;
+            if (File.Exists(fileName))
             {
-                fileName = fileName.Substring(1);
-                Console.WriteLine($"Ответ который появится на странице: {fileName}");
-                string responseStr = $"<h1>{fileName}</h1>";
-                byte[] buffer = Encoding.UTF8.GetBytes(responseStr);
-                context.Response.ContentLength64 = buffer.Length;
-                Stream output = context.Response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
+                try
+                {
+                    Stream fileStream = new FileStream(fileName, FileMode.Open);
+                    context.Response.ContentType = GetContentType(fileName);
+                    context.Response.ContentLength64 = fileStream.Length;
+                    context.Response.StatusCode = (int)HttpStatusCode.OK;
+                    byte[] buffer = new byte[16 * 1024];
+                    int dataLength;
+                    do
+                    {
+                        dataLength = fileStream.Read(buffer, 0, buffer.Length);
+                        context.Response.OutputStream.Write(buffer, 0, dataLength);
+                    }
+                    while (dataLength > 0);
+                    fileStream.Close();
+                    context.Response.OutputStream.Flush();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                }
             }
             else
             {
-                fileName = _siteDirectory + fileName;
-                if (File.Exists(fileName))
-                {
-                    try
-                    {
-                        Stream fileStream = new FileStream(fileName, FileMode.Open);
-                        context.Response.ContentType = GetContentType(fileName);
-                        context.Response.ContentLength64 = fileStream.Length;
-                        context.Response.StatusCode = (int)HttpStatusCode.OK;
-                        byte[] buffer = new byte[16 * 1024];
-                        int dataLength;
-                        do
-                        {
-                            dataLength = fileStream.Read(buffer, 0, buffer.Length);
-                            context.Response.OutputStream.Write(buffer, 0, dataLength);
-                        }
-                        while (dataLength > 0);
-                        fileStream.Close();
-                        context.Response.OutputStream.Flush();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    }
-                }
-                else
-                {
-                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                }
-            }           
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
             context.Response.OutputStream.Close();
         }
 

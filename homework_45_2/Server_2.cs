@@ -84,7 +84,7 @@ namespace homework_45_2
             }
             else
             {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                context.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
             }
             context.Response.OutputStream.Close();
         }
