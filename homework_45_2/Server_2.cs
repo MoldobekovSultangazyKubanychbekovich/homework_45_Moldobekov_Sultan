@@ -51,10 +51,6 @@ namespace homework_45_2
         {
             string fileName = context.Request.Url.AbsolutePath;
             Console.WriteLine(fileName);
-            if (fileName == "/")
-                fileName = "/index.html";
-            if (fileName == "/white_rabbit")
-                fileName = "/white_rabbit.html";
             fileName = _siteDirectory + fileName;
             Console.WriteLine(fileName);
             if (File.Exists(fileName))
